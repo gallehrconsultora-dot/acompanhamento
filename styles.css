@@ -17,3 +17,5 @@
 .modal-card{background:#111a2c!important;color:#e6eaf2}
 .modal-card label,.checks,.check-title{color:#aab4c6}
 @media(max-width:1050px){.calendar{grid-template-columns:repeat(7,120px);overflow-x:auto;padding-bottom:8px}.cal-day{min-width:120px}}
+
+.client-modal{width:min(760px,100%)}.edit-section{margin-top:20px;padding-top:16px;border-top:1px solid #202b40}.edit-section h3{font-size:14px;margin:0 0 12px;color:#e6eaf2}.edit-notes{width:100%;min-height:100px;background:#0d1525;color:#e6eaf2;border:1px solid #26324a;border-radius:9px;padding:11px;resize:vertical}.edit-actions{display:flex;gap:10px;margin-top:20px}.edit-actions button{padding:12px 16px;border-radius:9px;background:#3156d3;color:white;font-weight:700}.edit-actions .danger-btn{background:#3a1720;color:#ffb4ab;border:1px solid #6e2633}.edit-actions .danger-btn:hover{background:#4b1d28}
