@@ -24,6 +24,11 @@ $("logoutBtn").onclick=()=>db.auth.signOut();
 $("newClientBtn").onclick=()=>{$("modal").classList.remove("hidden");$("iDate").value=new Date().toISOString().slice(0,10)};
 $("closeModal").onclick=()=>$("modal").classList.add("hidden");
 $("refreshBtn").onclick=load;
+let weekOffset=0;
+$("prevWeek").onclick=()=>{weekOffset--;renderCalendar(currentInstallations||[])}
+$("nextWeek").onclick=()=>{weekOffset++;renderCalendar(currentInstallations||[])}
+$("todayWeek").onclick=()=>{weekOffset=0;renderCalendar(currentInstallations||[])}
+let currentInstallations=[];
 
 async function load(){
  const today=new Date().toISOString().slice(0,10);
@@ -35,6 +40,8 @@ async function load(){
  $("upcomingCount").textContent=inst.filter(x=>x.installation_date>=today&&x.status!=="instalado"&&x.status!=="nao_instalado").length;
  $("pendingCount").textContent=clients.filter(x=>x.status==="com_pendencia"||x.status==="precisa_confirmar").length;
  $("postCount").textContent=post.length;
+ currentInstallations=inst;
+ renderCalendar(inst);
  renderInstallations(inst.filter(x=>x.installation_date>=today).slice(0,8));
  renderClients(clients);
  renderAttention(tasks,clients);
@@ -51,6 +58,36 @@ function renderAttention(tasks,clients){
  const items=[...tasks.map(t=>({title:t.clients?.name||"Cliente",text:t.title+" · "+fmtDate(t.due_date),kind:"task"})),...clients.filter(c=>["precisa_confirmar","com_pendencia"].includes(c.status)).slice(0,5).map(c=>({title:c.name,text:statusLabel(c.status),kind:"pending"}))];
  $("attention").classList.toggle("empty",!items.length);
  $("attention").innerHTML=items.length?items.slice(0,8).map(x=>`<div class="item"><div><strong>${escapeHtml(x.title)}</strong><div class="muted">${escapeHtml(x.text)}</div></div><span class="badge ${x.kind==="pending"?"warning":""}">Atenção</span></div>`).join(""):"Tudo em dia por enquanto.";
+}
+
+function mondayOf(d){const x=new Date(d+"T12:00:00");const day=x.getDay()||7;x.setDate(x.getDate()-day+1);return x}
+function iso(d){return d.toISOString().slice(0,10)}
+function renderCalendar(rows){
+ const base=mondayOf(new Date().toISOString().slice(0,10));base.setDate(base.getDate()+weekOffset*7);
+ const days=Array.from({length:7},(_,i)=>{const d=new Date(base);d.setDate(base.getDate()+i);return d});
+ $("weekLabel").textContent=fmtDate(iso(days[0]))+" — "+fmtDate(iso(days[6]));
+ $("calendar").innerHTML=days.map(d=>{
+   const date=iso(d), day=d.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","");
+   const items=rows.filter(x=>x.installation_date===date);
+   return `<div class="cal-day ${date===iso(new Date())?"today":""}">
+     <div class="cal-head"><span>${day}</span><b>${d.getDate()}</b></div>
+     <div class="slot"><small>MANHÃ</small>${items.filter(x=>x.shift==="manha").map(calCard).join("")||'<div class="cal-empty">—</div>'}</div>
+     <div class="slot"><small>TARDE</small>${items.filter(x=>x.shift==="tarde").map(calCard).join("")||'<div class="cal-empty">—</div>'}</div>
+   </div>`
+ }).join("");
+}
+function calCard(x){
+ const cls=x.status==="instalado"?"success":x.status==="nao_instalado"?"danger":x.status==="em_instalacao"?"warning":"";
+ return `<div class="cal-card ${cls}" onclick="openClient('${x.client_id}')">
+   <strong>${escapeHtml(x.clients?.name||"Cliente")}</strong>
+   <span>${statusLabel(x.status)}</span>
+ </div>`
+}
+async function openClient(id){
+ const {data:c}=await db.from("clients").select("*").eq("id",id).single();
+ const {data:i=[]}=await db.from("installations").select("*").eq("client_id",id).order("installation_date",{ascending:false});
+ if(!c)return;
+ alert(c.name+"\\n\\nStatus: "+statusLabel(c.status)+"\\nPlano: "+(c.plan||"Não informado")+"\\nTelefone: "+(c.phone||"Não informado")+"\\n\\nInstalações: "+i.map(x=>fmtDate(x.installation_date)+" · "+shiftLabel(x.shift)+" · "+statusLabel(x.status)).join("\\n"));
 }
 function statusLabel(s){return ({venda_realizada:"Venda realizada",aguardando_instalacao:"Aguardando instalação",precisa_confirmar:"Precisa confirmar",com_pendencia:"Com pendência",instalacao_hoje:"Instalação hoje",instalado:"Instalado",nao_instalado:"Não instalado",pos_venda:"Pós-venda",concluido:"Concluído",agendada:"Agendada",confirmada:"Confirmada",tecnico_a_caminho:"Técnico a caminho",em_instalacao:"Em instalação",reagendada:"Reagendada"})[s]||s}
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
