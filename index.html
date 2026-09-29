@@ -83,5 +83,25 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
-</body>
+<div id="clientModal" class="modal hidden">
+<div class="modal-card client-modal">
+<div class="modal-head"><div><h2 id="editTitle">Cliente</h2><div id="editSubtitle" class="muted"></div></div><button id="closeClient" class="ghost">×</button></div>
+<div class="edit-section"><h3>📋 Dados da instalação</h3>
+<div class="form-grid">
+<label>Data<input id="eDate" type="date"></label>
+<label>Turno<select id="eShift"><option value="manha">Manhã</option><option value="tarde">Tarde</option></select></label>
+<label>Status<select id="eStatus"><option value="agendada">Agendada</option><option value="confirmada">Confirmada</option><option value="tecnico_a_caminho">Técnico a caminho</option><option value="em_instalacao">Em instalação</option><option value="instalado">Instalado</option><option value="nao_instalado">Não instalado</option><option value="reagendada">Reagendada</option></select></label>
+<label>Técnico<input id="eTech"></label>
+</div></div>
+<div class="edit-section"><h3>🔎 Pré-instalação</h3>
+<div class="checks">
+<label><input id="eAddress" type="checkbox"> Endereço conferido</label>
+<label><input id="eSchedule" type="checkbox"> Cliente sabe dia e turno</label>
+<label><input id="ePerson" type="checkbox"> Alguém estará no local</label>
+<label><input id="eCondo" type="checkbox"> Acesso ao condomínio</label>
+</div></div>
+<div class="edit-section"><h3>📝 Observações</h3><textarea id="eNotes" class="edit-notes"></textarea></div>
+<div id="editMsg" class="msg"></div>
+<div class="edit-actions"><button id="saveEditBtn">Salvar alterações</button><button id="deleteEditBtn" class="danger-btn">Excluir cliente</button></div>
+</div></div></body>
 </html>
