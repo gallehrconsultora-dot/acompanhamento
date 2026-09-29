@@ -118,3 +118,27 @@ $("saveClientBtn").onclick=async()=>{
  load();
 };
 
+
+$("closeClient").onclick=function(){ $("clientModal").classList.add("hidden"); };
+$("clientModal").onclick=function(e){ if(e.target===this)this.classList.add("hidden"); };
+$("saveEditBtn").onclick=async function(){
+ if(!editingClientId||!editingInstallationId){$("editMsg").textContent="Cliente não identificado.";return}
+ const btn=this;btn.disabled=true;$("editMsg").textContent="Salvando...";
+ const p={installation_date:$("eDate").value,shift:$("eShift").value,status:$("eStatus").value,technician:$("eTech").value.trim(),notes:$("eNotes").value.trim()};
+ const r1=await db.from("installations").update(p).eq("id",editingInstallationId);
+ if(r1.error){$("editMsg").textContent="Erro: "+r1.error.message;btn.disabled=false;return}
+ const cs=p.status==="instalado"?"instalado":p.status==="nao_instalado"?"nao_instalado":"aguardando_instalacao";
+ const r2=await db.from("clients").update({notes:p.notes,status:cs}).eq("id",editingClientId);
+ if(r2.error){$("editMsg").textContent="Erro: "+r2.error.message;btn.disabled=false;return}
+ const r3=await db.from("checklists").upsert({client_id:editingClientId,address_confirmed:$("eAddress").checked,installation_schedule_confirmed:$("eSchedule").checked,person_available:$("ePerson").checked,condominium_access:$("eCondo").checked},{onConflict:"client_id"});
+ if(r3.error){$("editMsg").textContent="Erro: "+r3.error.message;btn.disabled=false;return}
+ $("editMsg").textContent="✓ Alterações salvas!";
+ setTimeout(()=>{$("clientModal").classList.add("hidden");btn.disabled=false;load()},500);
+};
+$("deleteEditBtn").onclick=async function(){
+ if(!editingClientId||!confirm("Excluir este cliente e todos os dados da instalação?"))return;
+ const r=await db.from("clients").delete().eq("id",editingClientId);
+ if(r.error){$("editMsg").textContent="Erro: "+r.error.message;return}
+ $("clientModal").classList.add("hidden");load();
+};
+boot();
