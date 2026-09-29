@@ -129,77 +129,26 @@ $("saveClientBtn").onclick=async()=>{
 
 
 
-document.addEventListener("click", async function(e) {
-  if (e.target.closest("#closeClient")) {
-    e.preventDefault();
-    const modal = document.getElementById("clientModal");
-    if (modal) modal.classList.add("hidden");
-    return;
-  }
 
-  if (e.target.id === "clientModal") {
-    e.target.classList.add("hidden");
-    return;
-  }
-
-  const saveBtn = e.target.closest("#saveEditBtn");
-  if (!saveBtn) return;
-
-  e.preventDefault();
-  if (!editingClientId || !editingInstallationId) {
-    const msg = document.getElementById("editMsg");
-    if (msg) msg.textContent = "Cliente não identificado. Feche e abra a ficha novamente.";
-    return;
-  }
-
-  saveBtn.disabled = true;
-  const msg = document.getElementById("editMsg");
-  msg.textContent = "Salvando...";
-
-  try {
-    const payload = {
-      installation_date: document.getElementById("eDate").value,
-      shift: document.getElementById("eShift").value,
-      status: document.getElementById("eStatus").value,
-      technician: document.getElementById("eTech").value.trim(),
-      notes: document.getElementById("eNotes").value.trim()
-    };
-
-    const r1 = await db.from("installations")
-      .update(payload)
-      .eq("id", editingInstallationId);
-
-    if (r1.error) throw new Error("Instalação: " + r1.error.message);
-
-    const clientStatus =
-      payload.status === "instalado" ? "instalado" :
-      payload.status === "nao_instalado" ? "nao_instalado" :
-      "aguardando_instalacao";
-
-    const r2 = await db.from("clients")
-      .update({ notes: payload.notes, status: clientStatus })
-      .eq("id", editingClientId);
-
-    if (r2.error) throw new Error("Cliente: " + r2.error.message);
-
-    const r3 = await db.from("checklists").upsert({
-      client_id: editingClientId,
-      address_confirmed: document.getElementById("eAddress").checked,
-      installation_schedule_confirmed: document.getElementById("eSchedule").checked,
-      person_available: document.getElementById("ePerson").checked,
-      condominium_access: document.getElementById("eCondo").checked
-    }, { onConflict: "client_id" });
-
-    if (r3.error) throw new Error("Checklist: " + r3.error.message);
-
-    msg.textContent = "✓ Alterações salvas!";
-    await new Promise(resolve => setTimeout(resolve, 500));
-    document.getElementById("clientModal").classList.add("hidden");
-    saveBtn.disabled = false;
-    await load();
-  } catch (err) {
-    msg.textContent = "Não foi possível salvar: " + err.message;
-    saveBtn.disabled = false;
-  }
-});
+window.closeClientModal=function(){var m=document.getElementById("clientModal");if(m)m.classList.add("hidden");};
+window.saveClientEdit=async function(){
+ var msg=document.getElementById("editMsg"),btn=document.getElementById("saveEditBtn");
+ if(!editingClientId||!editingInstallationId){msg.textContent="Cliente não identificado.";return;}
+ btn.disabled=true;msg.textContent="Salvando...";
+ try{
+  var p={installation_date:document.getElementById("eDate").value,shift:document.getElementById("eShift").value,status:document.getElementById("eStatus").value,technician:document.getElementById("eTech").value.trim(),notes:document.getElementById("eNotes").value.trim()};
+  var r=await db.from("installations").update(p).eq("id",editingInstallationId);if(r.error)throw r.error;
+  var cs=p.status==="instalado"?"instalado":p.status==="nao_instalado"?"nao_instalado":"aguardando_instalacao";
+  r=await db.from("clients").update({notes:p.notes,status:cs}).eq("id",editingClientId);if(r.error)throw r.error;
+  r=await db.from("checklists").upsert({client_id:editingClientId,address_confirmed:document.getElementById("eAddress").checked,installation_schedule_confirmed:document.getElementById("eSchedule").checked,person_available:document.getElementById("ePerson").checked,condominium_access:document.getElementById("eCondo").checked},{onConflict:"client_id"});if(r.error)throw r.error;
+  msg.textContent="✓ Alterações salvas!";
+  setTimeout(function(){closeClientModal();load();btn.disabled=false;},500);
+ }catch(e){msg.textContent="Erro ao salvar: "+(e.message||e);btn.disabled=false;}
+};
+window.deleteClient=async function(){
+ if(!editingClientId||!confirm("Excluir este cliente e todos os dados da instalação?"))return;
+ var r=await db.from("clients").delete().eq("id",editingClientId);
+ if(r.error){document.getElementById("editMsg").textContent="Erro: "+r.error.message;return;}
+ closeClientModal();load();
+};
 boot();
