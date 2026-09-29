@@ -16,9 +16,18 @@ function toggle(session){
  if(session) load();
 }
 $("loginBtn").onclick=async()=>{
- $("loginMsg").textContent="";
- const {error}=await db.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
- if(error)$("loginMsg").textContent="E-mail ou senha inválidos.";
+ const msg=$("loginMsg"), btn=$("loginBtn");
+ const email=$("email").value.trim(), password=$("password").value;
+ msg.textContent="";
+ if(!email||!password){msg.textContent="Digite seu e-mail e sua senha.";return}
+ btn.disabled=true;btn.textContent="Entrando...";
+ try{
+   const {data,error}=await db.auth.signInWithPassword({email,password});
+   if(error){msg.textContent="Erro ao entrar: "+error.message;return}
+   if(!data.session){msg.textContent="Login não criou uma sessão. Verifique o usuário no Supabase.";return}
+   toggle(data.session);
+ }catch(err){msg.textContent="Erro de conexão: "+(err?.message||"tente novamente.");}
+ finally{btn.disabled=false;btn.textContent="Entrar";}
 };
 $("logoutBtn").onclick=()=>db.auth.signOut();
 $("newClientBtn").onclick=()=>{$("modal").classList.remove("hidden");$("iDate").value=new Date().toISOString().slice(0,10)};
