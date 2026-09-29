@@ -117,6 +117,36 @@ $("saveClientBtn").onclick=async()=>{
  ["ckAddress","ckSchedule","ckPerson","ckCondo"].forEach(id=>$(id).checked=false);
  load();
 };
+
+$("closeClient").addEventListener("click",function(){ $("clientModal").classList.add("hidden"); });
+$("clientModal").addEventListener("click",function(e){ if(e.target===this) this.classList.add("hidden"); });
+
+$("saveEditBtn").addEventListener("click",async function(){
+ if(!editingClientId||!editingInstallationId){ $("editMsg").textContent="Não foi possível identificar o cliente."; return; }
+ this.disabled=true; $("editMsg").textContent="Salvando...";
+ const installation={installation_date:$("eDate").value,shift:$("eShift").value,status:$("eStatus").value,technician:$("eTech").value.trim(),notes:$("eNotes").value.trim()};
+ const r1=await db.from("installations").update(installation).eq("id",editingInstallationId);
+ if(r1.error){$("editMsg").textContent="Erro ao salvar instalação: "+r1.error.message;this.disabled=false;return;}
+ const clientStatus=installation.status==="instalado"?"instalado":installation.status==="nao_instalado"?"nao_instalado":"aguardando_instalacao";
+ const r2=await db.from("clients").update({notes:installation.notes,status:clientStatus}).eq("id",editingClientId);
+ if(r2.error){$("editMsg").textContent="Erro ao salvar cliente: "+r2.error.message;this.disabled=false;return;}
+ const checklist={client_id:editingClientId,address_confirmed:$("eAddress").checked,installation_schedule_confirmed:$("eSchedule").checked,person_available:$("ePerson").checked,condominium_access:$("eCondo").checked};
+ const r3=await db.from("checklists").upsert(checklist,{onConflict:"client_id"});
+ if(r3.error){$("editMsg").textContent="Erro ao salvar checklist: "+r3.error.message;this.disabled=false;return;}
+ $("editMsg").textContent="✓ Alterações salvas!";
+ await new Promise(r=>setTimeout(r,500));
+ $("clientModal").classList.add("hidden"); this.disabled=false; await load();
+});
+
+$("deleteEditBtn").addEventListener("click",async function(){
+ if(!editingClientId)return;
+ if(!confirm("Excluir este cliente e todos os dados da instalação?"))return;
+ this.disabled=true; $("editMsg").textContent="Excluindo...";
+ const r=await db.from("clients").delete().eq("id",editingClientId);
+ if(r.error){$("editMsg").textContent="Erro: "+r.error.message;this.disabled=false;return;}
+ $("clientModal").classList.add("hidden");this.disabled=false;await load();
+});
+
 boot();
 $("closeClient").addEventListener("click",()=> $("clientModal").classList.add("hidden"));
 $("clientModal").addEventListener("click",(e)=>{if(e.target.id==="clientModal")$("clientModal").classList.add("hidden")});
