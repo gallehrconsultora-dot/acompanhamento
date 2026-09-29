@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acompanhamento de Instalações</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div id="login" class="login-wrap">
+  <div class="login-card">
+    <div class="brand">Acompanhamento</div>
+    <h1>Entrar no painel</h1>
+    <p>Controle suas vendas desde o primeiro contato até a instalação e o pós-venda.</p>
+    <input id="email" type="email" placeholder="E-mail">
+    <input id="password" type="password" placeholder="Senha">
+    <button id="loginBtn">Entrar</button>
+    <div id="loginMsg" class="msg"></div>
+  </div>
+</div>
+<div id="app" class="hidden">
+<header class="topbar">
+  <div><strong>Acompanhamento</strong><span>Clientes & instalações</span></div>
+  <button id="logoutBtn" class="ghost">Sair</button>
+</header>
+<main>
+  <section class="hero">
+    <div><h1>Bom dia 👋</h1><p>Quem precisa da sua atenção hoje?</p></div>
+    <button id="newClientBtn">+ Nova venda</button>
+  </section>
+  <section class="stats">
+    <div class="stat"><span>Instalações hoje</span><b id="todayCount">0</b></div>
+    <div class="stat"><span>Próximas instalações</span><b id="upcomingCount">0</b></div>
+    <div class="stat"><span>Com pendência</span><b id="pendingCount">0</b></div>
+    <div class="stat"><span>Pós-venda</span><b id="postCount">0</b></div>
+  </section>
+  <section class="grid">
+    <div class="panel">
+      <div class="panel-head"><h2>🚨 Atenção</h2></div>
+      <div id="attention" class="list empty">Tudo em dia por enquanto.</div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>📅 Próximas instalações</h2><button id="refreshBtn" class="ghost">Atualizar</button></div>
+      <div id="installations" class="list empty">Nenhuma instalação cadastrada.</div>
+    </div>
+  </section>
+  <section class="panel">
+    <div class="panel-head"><h2>👥 Clientes recentes</h2></div>
+    <div id="clients" class="list empty">Nenhum cliente cadastrado.</div>
+  </section>
+</main>
+</div>
+<div id="modal" class="modal hidden">
+  <div class="modal-card">
+    <div class="modal-head"><h2>Nova venda</h2><button id="closeModal" class="ghost">×</button></div>
+    <div class="form-grid">
+      <label>Cliente*<input id="cName"></label>
+      <label>Telefone<input id="cPhone"></label>
+      <label>Plano<input id="cPlan"></label>
+      <label>Valor<input id="cValue" type="number" step="0.01"></label>
+      <label>Data da instalação*<input id="iDate" type="date"></label>
+      <label>Turno*<select id="iShift"><option value="manha">Manhã</option><option value="tarde">Tarde</option></select></label>
+      <label class="full">Endereço<input id="cAddress"></label>
+      <label class="full">Observações<textarea id="cNotes"></textarea></label>
+    </div>
+    <div class="check-title">Pré-instalação</div>
+    <div class="checks">
+      <label><input id="ckAddress" type="checkbox"> Endereço conferido</label>
+      <label><input id="ckSchedule" type="checkbox"> Cliente sabe dia e turno</label>
+      <label><input id="ckPerson" type="checkbox"> Alguém estará no local</label>
+      <label><input id="ckCondo" type="checkbox"> Acesso ao condomínio</label>
+    </div>
+    <div id="formMsg" class="msg"></div>
+    <button id="saveClientBtn">Cadastrar venda</button>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</body>
+</html>
