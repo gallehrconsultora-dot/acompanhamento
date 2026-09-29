@@ -75,10 +75,11 @@ function renderCalendar(rows){
      <div class="slot"><small>TARDE</small>${items.filter(x=>x.shift==="tarde").map(calCard).join("")||'<div class="cal-empty">—</div>'}</div>
    </div>`
  }).join("");
+ document.querySelectorAll(".cal-card").forEach(el=>el.onclick=()=>openClient(el.dataset.client));
 }
 function calCard(x){
  const cls=x.status==="instalado"?"success":x.status==="nao_instalado"?"danger":x.status==="em_instalacao"?"warning":"";
- return `<div class="cal-card ${cls}" onclick="openClient('${x.client_id}')">
+ return `<div class="cal-card ${cls}" data-client="${x.client_id}">
    <strong>${escapeHtml(x.clients?.name||"Cliente")}</strong>
    <span>${statusLabel(x.status)}</span>
  </div>`
