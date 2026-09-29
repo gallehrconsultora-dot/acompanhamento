@@ -34,7 +34,14 @@
     <div class="stat"><span>Com pendência</span><b id="pendingCount">0</b></div>
     <div class="stat"><span>Pós-venda</span><b id="postCount">0</b></div>
   </section>
-  <section class="grid">
+  <section class="calendar-panel panel">
+  <div class="panel-head">
+    <div><h2>📅 Calendário de instalações</h2><div class="muted">Acompanhe sua semana de um só lugar.</div></div>
+    <div class="calendar-nav"><button id="prevWeek" class="ghost">‹</button><strong id="weekLabel"></strong><button id="nextWeek" class="ghost">›</button><button id="todayWeek" class="ghost">Hoje</button></div>
+  </div>
+  <div id="calendar" class="calendar"></div>
+</section>
+<section class="grid">
     <div class="panel">
       <div class="panel-head"><h2>🚨 Atenção</h2></div>
       <div id="attention" class="list empty">Tudo em dia por enquanto.</div>
