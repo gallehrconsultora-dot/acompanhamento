@@ -101,6 +101,7 @@ async function openClient(id){
  if(!c||!i.length)return;
  const ins=i[0]; editingClientId=id; editingInstallationId=ins.id;
  $("editTitle").textContent=c.name;
+ $("eName").value=c.name||""; $("ePhone").value=c.phone||""; $("ePlan").value=c.plan||""; $("eValue").value=c.value||""; $("eAddress").value=c.address||"";
  $("editSubtitle").textContent=(c.phone||"Sem telefone")+" · "+(c.plan||"Plano não informado");
  $("eDate").value=ins.installation_date; $("eShift").value=ins.shift; $("eStatus").value=ins.status; $("eTech").value=ins.technician||"";
  $("eAddress").checked=!!ck?.address_confirmed; $("eSchedule").checked=!!ck?.installation_schedule_confirmed; $("ePerson").checked=!!ck?.person_available; $("eCondo").checked=!!ck?.condominium_access;
@@ -136,6 +137,8 @@ window.saveClientEdit=async function(){
  if(!editingClientId||!editingInstallationId){msg.textContent="Cliente não identificado.";return;}
  btn.disabled=true;msg.textContent="Salvando...";
  try{
+  var clientData={name:document.getElementById("eName").value.trim(),phone:document.getElementById("ePhone").value.trim(),plan:document.getElementById("ePlan").value.trim(),value:document.getElementById("eValue").value?Number(document.getElementById("eValue").value):null,address:document.getElementById("eAddress").value.trim()};
+  var cr=await db.from("clients").update(clientData).eq("id",editingClientId);if(cr.error)throw cr.error;
   var p={installation_date:document.getElementById("eDate").value,shift:document.getElementById("eShift").value,status:document.getElementById("eStatus").value,technician:document.getElementById("eTech").value.trim(),notes:document.getElementById("eNotes").value.trim()};
   var r=await db.from("installations").update(p).eq("id",editingInstallationId);if(r.error)throw r.error;
   var cs=p.status==="instalado"?"instalado":p.status==="nao_instalado"?"nao_instalado":"aguardando_instalacao";
