@@ -85,7 +85,7 @@
 <script src="app.js"></script>
 <div id="clientModal" class="modal hidden">
 <div class="modal-card client-modal">
-<div class="modal-head"><div><h2 id="editTitle">Cliente</h2><div id="editSubtitle" class="muted"></div></div><button id="closeClient" class="ghost">×</button></div>
+<div class="modal-head"><div><h2 id="editTitle">Cliente</h2><div id="editSubtitle" class="muted"></div></div><button id="closeClient" class="ghost" type="button" onclick="closeClientModal()">×</button></div>
 <div class="edit-section"><h3>📋 Dados da instalação</h3>
 <div class="form-grid">
 <label>Data<input id="eDate" type="date"></label>
@@ -102,6 +102,6 @@
 </div></div>
 <div class="edit-section"><h3>📝 Observações</h3><textarea id="eNotes" class="edit-notes"></textarea></div>
 <div id="editMsg" class="msg"></div>
-<div class="edit-actions"><button id="saveEditBtn">Salvar alterações</button><button id="deleteEditBtn" class="danger-btn">Excluir cliente</button></div>
+<div class="edit-actions"><button id="saveEditBtn" type="button" onclick="saveClientEdit()">Salvar alterações</button><button id="deleteEditBtn" class="danger-btn" type="button" onclick="deleteClient()">Excluir cliente</button></div>
 </div></div></body>
 </html>
