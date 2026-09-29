@@ -118,15 +118,21 @@ $("saveClientBtn").onclick=async()=>{
  load();
 };
 boot();
-$("closeClient").onclick=()=>$("clientModal").classList.add("hidden");
+$("closeClient").addEventListener("click",()=> $("clientModal").classList.add("hidden"));
+$("clientModal").addEventListener("click",(e)=>{if(e.target.id==="clientModal")$("clientModal").classList.add("hidden")});
 $("saveEditBtn").onclick=async()=>{
- if(!editingClientId||!editingInstallationId)return;
+ if(!editingClientId||!editingInstallationId){$("editMsg").textContent="Cliente não identificado. Feche e abra a ficha novamente.";return}
  $("editMsg").textContent="Salvando...";
- const {error:e1}=await db.from("installations").update({installation_date:$("eDate").value,shift:$("eShift").value,status:$("eStatus").value,technician:$("eTech").value.trim(),notes:$("eNotes").value.trim()}).eq("id",editingInstallationId);
- const {error:e2}=await db.from("clients").update({notes:$("eNotes").value.trim(),status:$("eStatus").value==="instalado"?"instalado":$("eStatus").value==="nao_instalado"?"nao_instalado":"aguardando_instalacao"}).eq("id",editingClientId);
- const {error:e3}=await db.from("checklists").upsert({client_id:editingClientId,address_confirmed:$("eAddress").checked,installation_schedule_confirmed:$("eSchedule").checked,person_available:$("ePerson").checked,condominium_access:$("eCondo").checked},{onConflict:"client_id"});
- if(e1||e2||e3){$("editMsg").textContent=(e1||e2||e3).message;return}
- $("clientModal").classList.add("hidden"); load();
+ const payload={installation_date:$("eDate").value,shift:$("eShift").value,status:$("eStatus").value,technician:$("eTech").value.trim(),notes:$("eNotes").value.trim()};
+ const r1=await db.from("installations").update(payload).eq("id",editingInstallationId);
+ if(r1.error){$("editMsg").textContent="Erro na instalação: "+r1.error.message;return}
+ const clientStatus=["instalado","nao_instalado"].includes(payload.status)?payload.status:"aguardando_instalacao";
+ const r2=await db.from("clients").update({notes:payload.notes,status:clientStatus}).eq("id",editingClientId);
+ if(r2.error){$("editMsg").textContent="Erro no cliente: "+r2.error.message;return}
+ const r3=await db.from("checklists").upsert({client_id:editingClientId,address_confirmed:$("eAddress").checked,installation_schedule_confirmed:$("eSchedule").checked,person_available:$("ePerson").checked,condominium_access:$("eCondo").checked},{onConflict:"client_id"});
+ if(r3.error){$("editMsg").textContent="Erro no checklist: "+r3.error.message;return}
+ $("editMsg").textContent="Salvo com sucesso!";
+ setTimeout(()=>{ $("clientModal").classList.add("hidden"); load(); },400);
 };
 $("deleteEditBtn").onclick=async()=>{
  if(!editingClientId)return;
